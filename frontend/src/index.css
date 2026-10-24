@@ -1,0 +1,26 @@
+body {
+  margin: 0;
+  font-family: system-ui, Arial, sans-serif;
+  background: #f5f7fa;
+  color: #1f2933;
+}
+.nav {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 24px;
+  background: #12355b;
+  color: white;
+}
+.nav a {
+  color: #cfe3ff;
+  text-decoration: none;
+}
+.nav a:hover {
+  text-decoration: underline;
+}
+.page {
+  max-width: 900px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
