@@ -24,3 +24,50 @@ body {
   margin: 24px auto;
   padding: 0 16px;
 }
+
+.card {
+  background: white;
+  border: 1px solid #dde3ea;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.muted {
+  color: #6b7785;
+  font-size: 14px;
+}
+.error {
+  color: #b42318;
+  background: #fef3f2;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+label {
+  display: block;
+  margin: 12px 0 4px;
+  font-weight: 600;
+  font-size: 14px;
+}
+input,
+select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #c3ccd6;
+  border-radius: 6px;
+  font-size: 15px;
+}
+button {
+  margin-top: 16px;
+  padding: 10px 18px;
+  background: #12355b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
