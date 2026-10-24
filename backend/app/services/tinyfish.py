@@ -31,6 +31,13 @@ SEARCH_QUERIES = {
     "Canada": "site:canada.ca study permit apply documents India",
 }
 
+# Optional extra filter: if a corridor is listed here, the URL path must start
+# with one of these prefixes. Keeps the UK on Student visa pages only
+# (not Graduate visa or Short-term study visa pages).
+REQUIRED_PATH_PREFIXES = {
+    "United Kingdom": ["/student-visa"],
+}
+
 # TinyFish error codes that mean "blocked"; every other failure becomes "error".
 # Both end up as "could not verify" in the UI.
 BLOCKED_CODES = {"bot_blocked", "login_required"}
@@ -51,6 +58,15 @@ def is_official(url: str, destination: str) -> bool:
         if host == domain or host.endswith("." + domain):
             return True
     return False
+
+
+def _path_ok(url: str, destination: str) -> bool:
+    """True if the corridor has no path rule, or the URL path matches one."""
+    prefixes = REQUIRED_PATH_PREFIXES.get(destination)
+    if not prefixes:
+        return True
+    path = urlparse(url).path.lower()
+    return any(path.startswith(p) for p in prefixes)
 
 
 def content_hash(text: str) -> str:
@@ -88,7 +104,9 @@ def search_official(destination: str) -> list[dict]:
     kept, seen = [], set()
     for result in search(query):
         url = result.get("url", "")
-        if not url or url in seen or not is_official(url, destination):
+        if (not url or url in seen
+                or not is_official(url, destination)
+                or not _path_ok(url, destination)):
             continue
         seen.add(url)
         kept.append({"url": url, "rank": len(kept) + 1, "title": result.get("title", "")})
@@ -141,11 +159,11 @@ def fetch(urls: list[str]) -> list[dict]:
                       "status": "ok", "text": text,
                       "error_code": None, "raw_error": None}
 
-        for e in body.get("errors", []):
-            url = e.get("url", "")
-            # Verified from a real response: the field is "error" (older guess: "code")
-            code = e.get("error") or e.get("code") or "unknown_error"
-            pages[url] = failed(url, code, e)
+    for e in body.get("errors", []):
+        url = e.get("url", "")
+        # Verified from a real response: the field is "error" (older guess: "code")
+        code = e.get("error") or e.get("code") or "unknown_error"
+        pages[url] = failed(url, code, e)
 
     # One entry per requested URL, in order. Anything TinyFish did not report
     # is treated as an error, never as success.
