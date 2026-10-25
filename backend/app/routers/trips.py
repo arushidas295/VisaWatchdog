@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import asyncio
+import time
 
 from app import models, schemas
 from app.database import get_db
@@ -9,12 +10,10 @@ from app.services.extractor import extract_requirements
 
 router = APIRouter(prefix="/trips", tags=["trips"])
 
-# TEMP (remove in Phase 2): fixed user until real login exists
 TEMP_USER_ID = 1
 
 
 def _ensure_temp_user(db: Session) -> None:
-    """TEMP (remove in Phase 2): make sure the fixed user row exists."""
     if db.get(models.User, TEMP_USER_ID) is None:
         db.add(models.User(
             id=TEMP_USER_ID,
@@ -26,20 +25,12 @@ def _ensure_temp_user(db: Session) -> None:
 
 def _get_trip_or_404(trip_id: int, db: Session) -> models.Trip:
     trip = db.get(models.Trip, trip_id)
-    # TEMP (Phase 2): compare with the logged-in user instead of TEMP_USER_ID
     if trip is None or trip.user_id != TEMP_USER_ID:
         raise HTTPException(status_code=404, detail="Trip not found")
     return trip
 
 
-def _save_checklist_items(
-    trip_id: int,
-    items: list[dict],
-    source_url: str,
-    snapshot_fetched_at,
-    db: Session,
-) -> None:
-    """Save extracted items to checklist_items table. Skip duplicates by name."""
+def _save_checklist_items(trip_id, items, source_url, snapshot_fetched_at, db):
     existing_names = {
         row.name
         for row in db.query(models.ChecklistItem.name)
@@ -65,27 +56,19 @@ def _save_checklist_items(
 
 @router.post("", response_model=schemas.TripOut, status_code=201)
 def create_trip(payload: schemas.TripCreate, db: Session = Depends(get_db)):
-    """Create a trip, find official pages, fetch them, extract requirements."""
     _ensure_temp_user(db)
-
     trip = models.Trip(user_id=TEMP_USER_ID, **payload.model_dump())
     db.add(trip)
     db.commit()
     db.refresh(trip)
 
-    # 1. Search (official domains only)
     try:
         found = tinyfish.search_official(trip.destination)
     except tinyfish.TinyFishError as exc:
-        raise HTTPException(
-            status_code=502,
-            detail=f"Could not search for official sources: {exc}",
-        )
+        raise HTTPException(status_code=502, detail=f"Search failed: {exc}")
 
-    # 2. Fetch all found pages in one call
     pages = tinyfish.fetch([item["url"] for item in found])
 
-    # 3. Save sources + snapshots, then extract checklist items
     for item, page in zip(found, pages):
         source = models.Source(
             trip_id=trip.id,
@@ -105,17 +88,10 @@ def create_trip(payload: schemas.TripCreate, db: Session = Depends(get_db)):
             )
             db.add(snapshot)
             db.flush()
-
-            # 4. Extract requirements from this page
+            time.sleep(5)
             extracted = asyncio.run(extract_requirements(page["text"]))
-
-            # 5. Save valid items to checklist
             _save_checklist_items(
-                trip_id=trip.id,
-                items=extracted,
-                source_url=item["url"],
-                snapshot_fetched_at=snapshot.fetched_at,
-                db=db,
+                trip.id, extracted, item["url"], snapshot.fetched_at, db
             )
 
     db.commit()
@@ -130,7 +106,6 @@ def get_trip(trip_id: int, db: Session = Depends(get_db)):
 
 @router.get("/{trip_id}/checklist", response_model=list[schemas.ChecklistItemOut])
 def get_checklist(trip_id: int, db: Session = Depends(get_db)):
-    """Returns saved checklist items for a trip."""
     _get_trip_or_404(trip_id, db)
     return (
         db.query(models.ChecklistItem)
