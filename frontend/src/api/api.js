@@ -8,6 +8,10 @@ const TOKEN_KEY = "vw_token";
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
 export const setToken = (t) => localStorage.setItem(TOKEN_KEY, t);
 export const clearToken = () => localStorage.removeItem(TOKEN_KEY);
+// ---------- current trip storage ----------
+const TRIP_KEY = "vw_trip_id";
+export const getTripId = () => localStorage.getItem(TRIP_KEY);
+export const setTripId = (id) => localStorage.setItem(TRIP_KEY, String(id));
 
 // ---------- real requests ----------
 async function request(path, options = {}) {
