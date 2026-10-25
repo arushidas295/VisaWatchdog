@@ -71,3 +71,52 @@ button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.diff {
+  display: flex;
+  gap: 12px;
+  margin: 12px 0;
+}
+.diff-col {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+}
+.diff-old {
+  background: #fdecea;
+  border: 1px solid #f5b7b1;
+}
+.diff-new {
+  background: #e6f6ec;
+  border: 1px solid #a9dfbf;
+}
+.diff-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.badge-added {
+  background: #d4f5dd;
+  color: #14532d;
+}
+.badge-removed {
+  background: #fde8e8;
+  color: #9b1c1c;
+}
+.badge-modified {
+  background: #fff4cc;
+  color: #7a5b00;
+}
+.change-sim {
+  border: 2px dashed #b45309;
+}
+.sim-banner {
+  background: #b45309;
+  color: white;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
