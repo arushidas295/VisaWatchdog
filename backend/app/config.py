@@ -10,7 +10,8 @@ class Settings(BaseSettings):
     # Secrets: loaded from backend/.env, never written in code
     TINYFISH_API_KEY: str
     SECRET_KEY: str
-    LLM_API_KEY: str = ""  # empty until we pick an LLM (needed in Phase 3)
+    LLM_API_KEY: str = ""
+    LLM_MODEL: str = "llama-3.3-70b-versatile"
 
     # Non-secret settings with safe defaults
     DATABASE_URL: str = f"sqlite:///{(BASE_DIR / 'visa_watchdog.db').as_posix()}"

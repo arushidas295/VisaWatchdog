@@ -7,6 +7,9 @@ from app import models  # noqa: F401  (importing registers the tables)
 from app.config import settings
 from app.database import Base, engine
 from app.routers import trips
+from app.routers import alerts
+from app.routers import demo
+from app.routers import checklist
 
 
 @asynccontextmanager
@@ -26,6 +29,9 @@ app.add_middleware(
 )
 
 app.include_router(trips.router)
+app.include_router(alerts.router)
+app.include_router(demo.router)
+app.include_router(checklist.router)
 
 
 @app.get("/health")

@@ -1,12 +1,17 @@
-# Secrets
+# Environment secrets - NEVER commit this
+backend/.env
 .env
 
-# Python
+# Virtual environment - too large for git
+backend/venv/
 venv/
+
+# Python cache files
 __pycache__/
 *.pyc
+*.pyo
 
-# Database
+# Database files
 *.db
 *.sqlite3
 
@@ -14,6 +19,6 @@ __pycache__/
 node_modules/
 dist/
 
-# Editor / OS
+# VS Code / OS
 .vscode/
 .DS_Store
