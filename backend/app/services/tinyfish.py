@@ -3,6 +3,7 @@
 Endpoints and parameters here come from the official TinyFish docs
 (https://docs.tinyfish.ai). Re-check the docs before adding new parameters.
 """
+
 import hashlib
 from urllib.parse import urlparse
 
@@ -104,12 +105,17 @@ def search_official(destination: str) -> list[dict]:
     kept, seen = [], set()
     for result in search(query):
         url = result.get("url", "")
-        if (not url or url in seen
-                or not is_official(url, destination)
-                or not _path_ok(url, destination)):
+        if (
+            not url
+            or url in seen
+            or not is_official(url, destination)
+            or not _path_ok(url, destination)
+        ):
             continue
         seen.add(url)
-        kept.append({"url": url, "rank": len(kept) + 1, "title": result.get("title", "")})
+        kept.append(
+            {"url": url, "rank": len(kept) + 1, "title": result.get("title", "")}
+        )
         if len(kept) == MAX_SOURCES:
             break
     return kept
@@ -128,8 +134,14 @@ def fetch(urls: list[str]) -> list[dict]:
 
     def failed(url: str, code: str, raw=None) -> dict:
         status = "blocked" if code in BLOCKED_CODES else "error"
-        return {"url": url, "final_url": url, "status": status,
-                "text": "", "error_code": code, "raw_error": raw}
+        return {
+            "url": url,
+            "final_url": url,
+            "status": status,
+            "text": "",
+            "error_code": code,
+            "raw_error": raw,
+        }
 
     try:
         resp = httpx.post(
@@ -155,9 +167,14 @@ def fetch(urls: list[str]) -> list[dict]:
         if not text:
             pages[url] = failed(url, "empty_content")
             continue
-        pages[url] = {"url": url, "final_url": r.get("final_url", url),
-                      "status": "ok", "text": text,
-                      "error_code": None, "raw_error": None}
+        pages[url] = {
+            "url": url,
+            "final_url": r.get("final_url", url),
+            "status": "ok",
+            "text": text,
+            "error_code": None,
+            "raw_error": None,
+        }
 
     for e in body.get("errors", []):
         url = e.get("url", "")
