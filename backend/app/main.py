@@ -37,3 +37,5 @@ app.include_router(checklist.router)
 @app.get("/health")
 def health():
     return {"status": "ok"}
+from app.routers import auth  # noqa: E402
+app.include_router(auth.router)
